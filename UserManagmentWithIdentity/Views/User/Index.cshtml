@@ -1,0 +1,85 @@
+﻿@model IEnumerable<UserViewModel>
+
+@{
+    ViewData["Title"] = " Hello User!";
+}
+
+<h1> Users</h1>
+<a asp-action="Add" class="btn btn-primary">Add New</a>
+<div id="alert" class="alert alert-success alert-dismissible fade show mt-4 d-none" role="alert">
+    User deleted.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<table class="table table-striped mt-4">
+
+    <thead class="bg-primary text-white">
+        <tr>
+            
+            <th>Full Name</th>
+            <th>User Name</th>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Actions</th>
+        </tr>
+
+    </thead>
+    <tbody>
+        @foreach (var r in Model)
+        {
+            <tr>
+
+                <td>@r.FullName</td>
+                <td>@r.UserName</td>
+                <td>@r.Email</td>
+                <td>@string.Join(" , ",r.Roles.ToList())</td>
+                <td>
+                    <a class="btn btn-primary" asp-controller="User" asp-action="ManageRoles" asp-route-UserId="@r.Id"> Managr Roles</a>
+                    <a class="btn btn-outline-primary" asp-controller="User" asp-action="Edit" asp-route-UserId="@r.Id">Modify Profile</a>
+                    <a href="javascript:;" class="btn btn-danger js-delete" data-id="@r.Id">Delete</a>
+                </td>
+            </tr>
+
+        }
+    </tbody>
+
+</table>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.js-delete').on('click', function () {
+                var btn = $(this);
+                bootbox.confirm({
+                    message: 'Are You sure you want to DELETE this User?',
+                    buttons: {
+                        confirm: {
+                            label: 'Yes',
+                            className: 'btn-danger'
+                        },
+                        cancel: {
+                            label: 'No',
+                            className: 'btn-success'
+                        }
+                    },
+                    callback: function (result) {
+                        if (result) {
+                            $.ajax({
+                                url: '/api/users/?userid=' + btn.data('id'),
+
+                                method: 'DELETE',
+                                success: function () {
+                                    //
+                                    btn.parents('tr').fadeOut();
+                                    $('#alert').removeClass('d-none');
+                                    setTimeout(function () { $('#alert').addClass('d-none'); },3000);
+                                },
+                                error: function () {
+                                    alert('Something went Wrong');
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}
